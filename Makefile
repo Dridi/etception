@@ -45,5 +45,8 @@ install:
 	cp -P $(SO_MAJ) $(DESTDIR)$(LIBDIR)/$(SO_MAJ)
 	cp -P $(SHARED) $(DESTDIR)$(LIBDIR)/$(SHARED)
 
+check: $(SHARED)
+	./test.sh $(SHARED)
+
 clean:
 	-rm -f *.so* *.o
