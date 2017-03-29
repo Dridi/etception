@@ -146,33 +146,12 @@ __etcept_path(const char *path)
 	return (path);
 }
 
-int
-access(const char *path, int mode)
-{
-
-	ETCEPT_CONDINIT(access);
-	path = __etcept_path(path);
-	return (next_access(path, mode));
-}
-
-FILE *
-fopen(const char *path, const char *mode)
-{
-
-	ETCEPT_CONDINIT(fopen);
-	path = __etcept_path(path);
-	return (next_fopen(path, mode));
-}
-
-FILE *
-freopen(const char *path, const char *mode, FILE *stream)
-{
-
-	ETCEPT_CONDINIT(freopen);
-	path = __etcept_path(path);
-	return (next_freopen(path, mode, stream));
-}
-
+#define ETCEPT_SIMPLE_RETURN(fn, ...)			\
+do {							\
+	ETCEPT_CONDINIT(fn);				\
+	path = __etcept_path(path);			\
+	return (next_##fn(__VA_ARGS__));		\
+} while (0)
 
 #define ETCEPT_OPEN(fn, ...)				\
 do {							\
@@ -198,6 +177,28 @@ do {							\
 } while (0)
 
 int
+access(const char *path, int mode)
+{
+
+	ETCEPT_SIMPLE_RETURN(access, path, mode);
+}
+
+FILE *
+fopen(const char *path, const char *mode)
+{
+
+	ETCEPT_SIMPLE_RETURN(fopen, path, mode);
+}
+
+FILE *
+freopen(const char *path, const char *mode, FILE *stream)
+{
+
+	ETCEPT_SIMPLE_RETURN(freopen, path, mode, stream);
+}
+
+
+int
 open(const char *path, int flags, ...)
 {
 
@@ -215,9 +216,7 @@ int
 stat(const char *path, struct stat *buf)
 {
 
-	ETCEPT_CONDINIT(stat);
-	path = __etcept_path(path);
-	return (next_stat(path, buf));
+	ETCEPT_SIMPLE_RETURN(stat, path, buf);
 }
 
 #ifdef __linux__
@@ -225,8 +224,6 @@ int
 statfs(const char *path, struct statfs *buf)
 {
 
-	ETCEPT_CONDINIT(statfs);
-	path = __etcept_path(path);
-	return (next_statfs(path, buf));
+	ETCEPT_SIMPLE_RETURN(statfs, path, buf);
 }
 #endif
