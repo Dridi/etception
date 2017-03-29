@@ -50,6 +50,7 @@ ETCEPT_NEXT(int, access, const char *, int);
 ETCEPT_NEXT(FILE *, fopen, const char *, const char *);
 ETCEPT_NEXT(FILE *, freopen, const char *, const char *, FILE *);
 ETCEPT_NEXT(int, open, const char *, int, ...);
+ETCEPT_NEXT(int, openat, int, const char *, int, ...);
 ETCEPT_NEXT(int, stat, const char *, struct stat *);
 #ifdef __linux__
 ETCEPT_NEXT(int, statfs, const char *, struct statfs *);
@@ -63,6 +64,7 @@ __etcept_init(void)
 	ETCEPT_INIT(fopen);
 	ETCEPT_INIT(freopen);
 	ETCEPT_INIT(open);
+	ETCEPT_INIT(openat);
 	ETCEPT_INIT(stat); /* XXX: lstat too? */
 #ifdef __linux__
 	ETCEPT_INIT(statfs); /* XXX: stat64 too? */
@@ -171,28 +173,42 @@ freopen(const char *path, const char *mode, FILE *stream)
 	return (next_freopen(path, mode, stream));
 }
 
+
+#define ETCEPT_OPEN(fn, ...)				\
+do {							\
+	va_list ap;					\
+	int has_mode;					\
+	mode_t mode = -1;				\
+							\
+	ETCEPT_CONDINIT(fn);				\
+							\
+	has_mode = flags & (O_CREAT | O_TMPFILE);	\
+	if (has_mode) {					\
+		va_start(ap, flags);			\
+		mode = va_arg(ap, mode_t);		\
+		va_end(ap);				\
+	}						\
+							\
+	path = __etcept_path(path);			\
+							\
+	if (has_mode)					\
+		return (next_##fn(__VA_ARGS__, mode));	\
+							\
+	return (next_##fn(__VA_ARGS__));		\
+} while (0)
+
 int
 open(const char *path, int flags, ...)
 {
-	va_list ap;
-	int has_mode;
-	mode_t mode = -1;
 
-	ETCEPT_CONDINIT(open);
+	ETCEPT_OPEN(open, path, flags);
+}
 
-	has_mode = flags & (O_CREAT | O_TMPFILE);
-	if (has_mode) {
-		va_start(ap, flags);
-		mode = va_arg(ap, mode_t);
-		va_end(ap);
-	}
+int
+openat(int dirfd, const char *path, int flags, ...)
+{
 
-	path = __etcept_path(path);
-
-	if (has_mode)
-		return (next_open(path, flags, mode));
-
-	return (next_open(path, flags));
+	ETCEPT_OPEN(openat, dirfd, path, flags);
 }
 
 int

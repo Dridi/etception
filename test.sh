@@ -69,5 +69,6 @@ echo '::1 unlikely.etception.domain.name' > etc/hosts
 check getent hosts unlikely.etception.domain.name
 
 # XXX: assuming localhost defined in /etc/hosts
+check grep unlikely.etception.domain.name /etc/hosts
 check grep localhost /etc/./hosts
 check grep localhost /etc/../etc/hosts
