@@ -89,9 +89,11 @@ etception happens only inside the current working directory, which is not
 ideal when different processes may run in different working directories.
 
 Only absolute paths starting with ``/etc/`` are etcepted, and paths containing
-``.`` or ``..`` components aren't. Programs or script changing or clearing
-their environments before executing other programs may prevent ``libetcept``
-to be pre-loaded further downstream. Nothing is currently done to prevent it.
+``.`` or ``..`` components aren't.
+
+Programs or scripts changing or clearing their environments before executing
+other programs may prevent ``libetcept`` to be pre-loaded further downstream.
+Nothing is currently done to prevent it.
 
 An etception occurs only if a file exists in the working directory: creating
 a file in ``/etc`` would likely be attempted in ``/etc``. This use case is
