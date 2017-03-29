@@ -101,6 +101,24 @@ __etcept_stat(const char *path)
 	return (0);
 }
 
+static unsigned
+__etcept_sane(const char *path)
+{
+	int dots = 0;
+
+	while (*path) {
+		if (*path == '/' && (dots == 1 || dots == 2))
+			return (0);
+		if (*path == '.')
+			dots++;
+		else
+			dots = 0;
+		path++;
+	}
+
+	return (dots != 1 && dots != 2);
+}
+
 static const char *
 __etcept_path(const char *path)
 {
@@ -113,7 +131,8 @@ __etcept_path(const char *path)
 		if (strncmp("/etc/", path, sizeof "/etc/" - 1))
 			break;
 
-		/* TODO: detect . or .. in path */
+		if (!__etcept_sane(path))
+			break;
 
 		if (__etcept_stat(path) != 0)
 			break;
