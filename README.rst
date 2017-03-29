@@ -5,7 +5,7 @@ etception
 
 1. an act or instance of etcepting.
 2. the pre-load of ``libetcept`` when running a program.
-3. the ability not to constrained by global configuration.
+3. the ability not to be constrained by global configuration.
 
 This is ``libetcept``, a simple library meant for test suites struggling with
 global configuration. It is similar to the cwrap_ project, but has different
@@ -52,7 +52,7 @@ only need this much::
     ::42            localhost
 
 On multi-lib systems, installing both the 32-bit and 64-bit builds of the
-library, the example above should work with both kinds of processes. On a
+library, the example above should work with both kinds of programs. On a
 64-bit system you would otherwise not be able to run 32-bit programs with
 an absolute path in ``LD_PRELOAD``. Some systems support ``LD_PRELOAD_32``
 and ``LD_PRELOAD_64`` environment variables that could also help in that
@@ -73,7 +73,7 @@ in this area. It is currently tested with the following components:
 
 It may be more portable, but that's how far testing went so far. In particular
 etception of functions wrapping system calls can be hidden compiler *"magic"*
-that can be hard to discover without testing on the actual platform.
+that can be hard to discover without testing on the actual platforms.
 
 Known limitations
 =================
