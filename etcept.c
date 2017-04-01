@@ -136,7 +136,7 @@ __etcept_path(const char *path)
 		if (!__etcept_sane(path))
 			break;
 
-		if (__etcept_stat(path) != 0)
+		if (__etcept_stat(path + 1) != 0)
 			break;
 
 		path++; /* etcepted */

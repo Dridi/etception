@@ -72,3 +72,6 @@ check getent hosts unlikely.etception.domain.name
 check grep unlikely.etception.domain.name /etc/hosts
 check grep localhost /etc/./hosts
 check grep localhost /etc/../etc/hosts
+
+echo ETCEPTION >etc/..silly.path
+check grep ETCEPTION /etc/..silly.path
