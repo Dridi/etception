@@ -106,9 +106,9 @@ __etcept_stat(const char *path)
 static unsigned
 __etcept_sane(const char *path)
 {
-	int dots = 0;
+	unsigned dots = 0;
 
-	while (*path) {
+	while (*path != '\0') {
 		if (*path == '/' && (dots == 1 || dots == 2))
 			return (0);
 		if (*path == '.')
