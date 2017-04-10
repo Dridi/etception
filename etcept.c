@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -56,9 +57,32 @@ ETCEPT_NEXT(int, stat, const char *, struct stat *);
 ETCEPT_NEXT(int, statfs, const char *, struct statfs *);
 #endif
 
+static int debug_fd = -1;
+
+#define ETCEPT_DEBUG(fmt, ...)						\
+	do {								\
+		if (debug_fd >= 0)					\
+			dprintf(debug_fd, "etcept::%s " fmt "\n",	\
+			    __func__, __VA_ARGS__);			\
+	} while (0)
+
+
 static void __attribute__((constructor))
 __etcept_init(void)
 {
+	const char *etcept_fd_var;
+	char *etcept_fd_end = NULL;
+	long int etcept_fd = -1;
+
+	etcept_fd_var = getenv("ETCEPT_FD");
+	if (etcept_fd_var != NULL)
+		etcept_fd = strtol(etcept_fd_var, &etcept_fd_end, 10);
+
+	if (etcept_fd >= 0 && *etcept_fd_end != '\0')
+		etcept_fd = -1; /* NB: ignore bogus ETCEPT_FD */
+
+	if (etcept_fd >= 0)
+		debug_fd = dup(etcept_fd); /* XXX: failure? */
 
 	ETCEPT_INIT(access);
 	ETCEPT_INIT(fopen);
@@ -82,8 +106,11 @@ __etcept_stat(const char *path)
 	ETCEPT_CONDINIT(statfs);
 	if (next_statfs != NULL) {
 		retval = next_statfs(path, &stfs);
-		if (retval != 0)
+		if (retval != 0) {
+			ETCEPT_DEBUG("statfs: errno=%d (%s)", errno,
+			    strerror(errno));
 			return (retval);
+		}
 		/* TODO: check regular file */
 		return (0);
 	}
@@ -150,6 +177,7 @@ __etcept_path(const char *path)
 do {							\
 	ETCEPT_CONDINIT(fn);				\
 	path = __etcept_path(path);			\
+	ETCEPT_DEBUG("path='%s'", path);		\
 	return (next_##fn(__VA_ARGS__));		\
 } while (0)
 
@@ -169,6 +197,7 @@ do {							\
 	}						\
 							\
 	path = __etcept_path(path);			\
+	ETCEPT_DEBUG("path='%s'", path);		\
 							\
 	if (has_mode)					\
 		return (next_##fn(__VA_ARGS__, mode));	\

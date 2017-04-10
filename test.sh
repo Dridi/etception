@@ -21,14 +21,26 @@ set -u
 # Fixtures
 # ========
 
+report() {
+	set -e
+	fmt="$1"
+	shift
+	printf "$fmt" "$@"
+	printf "$fmt" "$@" >&3
+}
+
 check() {
-	printf 'Running: %s\n===\n' "$*"
+	report 'Running: %s\n===\n' "$*"
 	if ! LD_PRELOAD="$ETCEPT_PRELOAD" "$@"
-	then
-		printf "Failed: LD_PRELOAD=%s %s\n" "$ETCEPT_PRELOAD" "$*" >&2
+	then {
+		printf "Failed: LD_PRELOAD=%s %s\n" "$ETCEPT_PRELOAD" "$*"
+		printf '<<<\n'
+		cat "$TMPLOG"
+		printf '>>>\n'
 		return 1
+	} >&2
 	fi
-	printf '\n'
+	report '\n'
 }
 
 xfail() {
@@ -43,10 +55,14 @@ readonly TMPDIR=$(mktemp -d test.XXXXXX)
 
 readonly LIBDIR=$(cd "$SRCDIR"; pwd)
 readonly WRKDIR=$(cd "$TMPDIR"; pwd)
+readonly TMPLOG="$WRKDIR/test.log"
 
 trap 'cd /; rm -rf "$WRKDIR"' EXIT
 
 cd "$WRKDIR"
+
+exec 3>"$TMPLOG"
+export ETCEPT_FD=3
 
 mkdir etc
 
