@@ -78,16 +78,22 @@ fi
 # Checks
 # ======
 
-check xfail getent hosts unlikely.etception.domain.name
+main() {
+	set -e
 
-echo '::1 unlikely.etception.domain.name' > etc/hosts
+	check xfail getent hosts unlikely.etception.domain.name
 
-check getent hosts unlikely.etception.domain.name
+	echo '::1 unlikely.etception.domain.name' > etc/hosts
 
-# XXX: assuming localhost defined in /etc/hosts
-check grep unlikely.etception.domain.name /etc/hosts
-check grep localhost /etc/./hosts
-check grep localhost /etc/../etc/hosts
+	check getent hosts unlikely.etception.domain.name
 
-echo ETCEPTION >etc/..silly.path
-check grep ETCEPTION /etc/..silly.path
+	# XXX: assuming localhost defined in /etc/hosts
+	check grep unlikely.etception.domain.name /etc/hosts
+	check grep localhost /etc/./hosts
+	check grep localhost /etc/../etc/hosts
+
+	echo ETCEPTION >etc/..silly.path
+	check grep ETCEPTION /etc/..silly.path
+}
+
+main
