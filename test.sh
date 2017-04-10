@@ -61,9 +61,6 @@ trap 'cd /; rm -rf "$WRKDIR"' EXIT
 
 cd "$WRKDIR"
 
-exec 3>"$TMPLOG"
-export ETCEPT_FD=3
-
 mkdir etc
 
 readonly SHARED=${SHARED:-libetcept.so}
@@ -96,4 +93,4 @@ main() {
 	check grep ETCEPTION /etc/..silly.path
 }
 
-main
+ETCEPT_FD=3 main 3>"$TMPLOG"
